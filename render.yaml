@@ -2,12 +2,17 @@ services:
   - type: web
     name: ai-planner
     env: python
-    buildCommand: pip install -r requirements.txt
+    buildCommand: |
+      pip install -r requirements.txt
+      flask init-db
     startCommand: gunicorn app:app
     envVars:
       - key: FLASK_SECRET_KEY
         sync: false
       - key: GEMINI_API_KEY
         sync: false
+      - key: FLASK_ENV
+        value: production
     healthCheckPath: /
-    autoDeploy: true 
+    autoDeploy: true
+    plan: free 
