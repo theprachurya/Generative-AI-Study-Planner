@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block title %}Generate New Plan - AI Study Planner{% endblock %}
+
+{% block content %}
+<h1>Generate a New Study Plan</h1>
+<p>Fill out the details below, and the AI will create a personalized plan for you.</p>
+
+<form method="POST" action="{{ url_for('generate_plan') }}" class="study-form">
+    <div class="form-group">
+        <label for="title">Plan Title:</label>
+        <input type="text" id="title" name="title" required>
+        <small>A short, descriptive title for your plan (e.g., "Finals Prep Week", "Calculus I Study Plan").</small>
+    </div>
+
+    <div class="form-group">
+        <label for="description">Description (Optional):</label>
+        <textarea id="description" name="description" rows="3"></textarea>
+        <small>Any additional notes or context for this plan.</small>
+    </div>
+
+    <div class="form-group form-row">
+        <div>
+            <label for="start_date">Start Date:</label>
+            <input type="date" id="start_date" name="start_date" required>
+        </div>
+        <div>
+            <label for="end_date">End Date:</label>
+            <input type="date" id="end_date" name="end_date" required>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="subjects">Subjects:</label>
+        <input type="text" id="subjects" name="subjects" required>
+        <small>Enter the subjects you want to study, separated by commas (e.g., Math, Physics, Chemistry).</small>
+    </div>
+
+    <div class="form-group">
+        <label for="subject_marks">Previous Exam Marks (Optional):</label>
+        <textarea id="subject_marks" name="subject_marks" rows="10"></textarea>
+        <small>Enter your previous exam marks in the following format (one subject per line):
+        <br>Subject Name
+        <br>Component Type (Theory/Practical)
+        <br>Assessment Name/Max Marks
+        <br>Obtained Marks
+        <br>
+        <br>Example:
+        <br>Mathematics
+        <br>Theory
+        <br>FT-I/5.00
+        <br>5.00
+        <br>FT-II/15.00
+        <br>15.00
+        <br>FT-III/15.00
+        <br>15.00
+        <br>
+        <br>Physics
+        <br>Theory
+        <br>FT-I/5.00
+        <br>4.50
+        <br>FT-II/15.00
+        <br>14.00
+        <br>FT-III/15.00
+        <br>14.50</small>
+    </div>
+
+    <div class="form-group">
+        <label for="learning_goal">Learning Goal:</label>
+        <textarea id="learning_goal" name="learning_goal" rows="3" required></textarea>
+        <small>What do you want to achieve with this study plan? (e.g., "Pass the final exam", "Understand core concepts of Chapter 5", "Complete project proposal").</small>
+    </div>
+
+    <div class="form-group">
+        <label for="difficulty_feedback">Subject Confidence/Difficulty:</label>
+        <textarea id="difficulty_feedback" name="difficulty_feedback" rows="4" required></textarea>
+        <small>Describe your confidence level or perceived difficulty for the subjects listed. Be specific! (e.g., "Very confident in Math basics, but struggling with integrals. Physics concepts are okay, but need practice with problem-solving. Chemistry feels completely new.").</small>
+    </div>
+
+    <div class="form-group">
+        <label for="hours_per_day">Hours Per Day:</label>
+        <input type="number" id="hours_per_day" name="hours_per_day" min="0.5" step="0.5" required>
+        <small>How many hours are you realistically willing to study each day on average?</small>
+    </div>
+
+    <div class="form-group">
+        <label>Days Not to Study On (Optional):</label>
+        <div class="checkbox-group">
+            <label><input type="checkbox" name="off_days" value="Monday"> Monday</label>
+            <label><input type="checkbox" name="off_days" value="Tuesday"> Tuesday</label>
+            <label><input type="checkbox" name="off_days" value="Wednesday"> Wednesday</label>
+            <label><input type="checkbox" name="off_days" value="Thursday"> Thursday</label>
+            <label><input type="checkbox" name="off_days" value="Friday"> Friday</label>
+            <label><input type="checkbox" name="off_days" value="Saturday"> Saturday</label>
+            <label><input type="checkbox" name="off_days" value="Sunday"> Sunday</label>
+        </div>
+        <small>Select any days you absolutely cannot or do not want to study.</small>
+    </div>
+
+    <div class="form-group">
+        <label for="class_schedule">Class/Fixed Schedule:</label>
+        <textarea id="class_schedule" name="class_schedule" rows="4"></textarea>
+        <small>Describe your fixed commitments like class hours, work, or appointments so the AI can schedule around them (e.g., "Classes MWF 9am-11am", "Work Tue/Thu 1pm-5pm", "Unavailable Saturday mornings").</small>
+    </div>
+
+    <button type="submit" class="btn btn-primary btn-large">Generate AI Study Plan</button>
+</form>
+{% endblock %} 

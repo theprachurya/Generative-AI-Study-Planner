@@ -1,0 +1,723 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ plan.title }} - AI Study Planner{% endblock %}
+
+{% block head_extra %}
+{# Add FullCalendar CSS #}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/6.1.10/main.min.css" rel="stylesheet" />
+<style>
+    /* Optional: Adjust calendar styling to better fit theme */
+    .fc .fc-button-primary {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+    .fc .fc-button-primary:hover {
+        background-color: color-mix(in srgb, var(--primary-color) 85%, black);
+        border-color: color-mix(in srgb, var(--primary-color) 85%, black);
+    }
+    #calendar-view {
+        border: 1px solid var(--border-color); /* Keep border */
+        padding: 10px; /* Add some padding */
+        min-height: 400px; /* Adjust height as needed */
+        background-color: var(--card-bg); /* Match card background */
+        border-radius: 5px;
+    }
+    .error-message {
+        color: #842029;
+        background-color: #f8d7da;
+        border: 1px solid #f5c2c7;
+        padding: 10px;
+        border-radius: 5px;
+        margin: 10px 0;
+    }
+    .schedule-actions {
+        margin-bottom: 15px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .download-section {
+        margin-top: 30px;
+    }
+    .fc-event {
+        margin: 1px 0;
+        padding: 2px;
+        max-height: none !important;
+    }
+    .fc-event-main {
+        padding: 2px;
+        max-height: none !important;
+    }
+    .fc-event-title {
+        font-weight: bold;
+        white-space: normal;
+        overflow: visible;
+        font-size: 0.85em;
+        line-height: 1.3;
+    }
+    .fc-event-time {
+        font-size: 0.8em;
+        opacity: 0.9;
+        font-weight: normal;
+    }
+    .fc-timegrid-event {
+        min-height: 40px !important;
+        overflow: hidden !important;
+        border-radius: 4px;
+    }
+    .fc-timegrid-event .fc-event-main {
+        padding: 4px !important;
+        overflow: hidden !important;
+    }
+    .fc-timegrid-event .fc-event-title {
+        font-size: 0.9em !important;
+        line-height: 1.3 !important;
+        font-weight: 600 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+    .fc-timegrid-event .fc-event-time {
+        font-size: 0.85em !important;
+        opacity: 0.9;
+        padding-bottom: 2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .fc-view-harness {
+        min-height: 600px;
+    }
+    .fc-timegrid-slot {
+        height: 40px !important;
+    }
+    .fc .fc-timegrid-slot-minor {
+        border-top-style: dashed;
+    }
+    /* Month view specific styles */
+    .fc-dayGridMonth-view .fc-event {
+        margin: 1px 0;
+        padding: 2px;
+        overflow: hidden;
+    }
+    
+    .fc-dayGridMonth-view .fc-event-title {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        font-size: 0.85em;
+    }
+    
+    /* Week view specific styles */
+    .fc-timegrid-event {
+        min-height: 40px !important;
+        overflow: hidden !important;
+        border-radius: 4px;
+    }
+    
+    .fc-timegrid-event .fc-event-main {
+        padding: 4px !important;
+        overflow: hidden !important;
+    }
+    
+    .fc-timegrid-event .fc-event-title {
+        font-size: 0.9em !important;
+        line-height: 1.3 !important;
+        font-weight: 600 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+    
+    .fc-timegrid-event .fc-event-time {
+        font-size: 0.85em !important;
+        opacity: 0.9;
+        padding-bottom: 2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .fc-view-harness {
+        min-height: 600px;
+    }
+    
+    .fc-timegrid-slot {
+        height: 40px !important;
+    }
+    
+    .fc .fc-timegrid-slot-minor {
+        border-top-style: dashed;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="plan-view">
+    <h1>{{ plan.title }}</h1>
+    <p class="plan-meta">Duration: {{ plan.start_date }} to {{ plan.end_date }} | Created: {{ plan.created_at|date("%Y-%m-%d %H:%M") }}</p>
+
+    {% if plan.description %}
+        <div class="plan-section">
+            <h2>Description</h2>
+            <p>{{ plan.description }}</p>
+        </div>
+    {% endif %}
+
+    <div class="plan-section">
+        <h2>AI Generated Learning Guide</h2>
+        <div class="ai-content">
+            {{ plan.generated_guide | safe }} {# Use safe filter if guide contains HTML #}
+        </div>
+    </div>
+
+    <div class="plan-section">
+        <h2>Learning Resources</h2>
+        <div class="ai-content">
+            {{ plan.resources | safe }}
+        </div>
+    </div>
+
+    <div class="plan-section">
+        <h2>Study Schedule</h2>
+        <div class="schedule-actions">
+            <button id="view-calendar-btn" class="btn btn-secondary">View as Calendar</button>
+            <button id="download-schedule-btn" class="btn btn-secondary">Download Schedule Text</button>
+            <button id="export-image-btn" class="btn btn-secondary">Save Calendar as Image</button>
+            {% if schedule_raw %}
+            <form action="{{ url_for('fix_schedule', plan_id=plan.id) }}" method="POST" style="display: inline;">
+                <button type="submit" class="btn btn-warning">Attempt to Fix JSON</button>
+            </form>
+            {% endif %}
+        </div>
+        <div id="calendar-view" style="display: none; margin-top: 20px;">
+            {# Calendar will be rendered here by FullCalendar #}
+        </div>
+        <div id="schedule-raw" class="ai-content schedule-raw-view">
+            {# Display raw schedule only if schedule_raw is passed (i.e., JSON was invalid) #}
+            {% if schedule_raw %}
+                <div class="flash-message flash-warning">
+                    The schedule could not be parsed automatically. Raw AI output is shown below.
+                </div>
+                <pre><code>{{ schedule_raw }}</code></pre>
+            {% else %}
+                 <p><em>Schedule data loaded. Use 'View as Calendar' or 'Download'.</em></p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="plan-section download-section">
+        <h2>Download Plan</h2>
+        <button id="download-plan-btn" class="btn btn-secondary">Download Full Plan (PDF/Text)</button>
+    </div>
+
+    {# Display other plan details for reference #}
+    <div class="plan-details-raw">
+        <h3>Plan Input Details (for reference)</h3>
+        <ul>
+            <li><strong>Subjects:</strong> {{ plan.subjects }}</li>
+            <li><strong>Learning Goal:</strong> {{ plan.learning_goal }}</li>
+            <li><strong>Confidence/Difficulty:</strong> {{ plan.difficulty_feedback }}</li>
+            <li><strong>Hours/Day:</strong> {{ plan.hours_per_day }}</li>
+            <li><strong>Off Days:</strong> {{ plan.off_days }}</li>
+            <li><strong>Class/Fixed Schedule:</strong> {{ plan.class_schedule }}</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts_extra %}
+{# Add FullCalendar JS #}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/6.1.10/index.global.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<script>
+    // Get schedule data passed from Flask (ensure it's safely converted to JS)
+    const scheduleData = {{ calendar_data | tojson | safe }};
+    const rawScheduleForDisplay = {{ schedule_raw | tojson | safe }};
+    let calendarInstance = null; // Hold the calendar instance
+
+    // Function to transform our data into FullCalendar events
+    function transformEvents(schedule) {
+        const events = [];
+        if (!schedule || typeof schedule !== 'object') {
+            console.warn("Invalid schedule data:", schedule);
+            return events;
+        }
+        
+        try {
+            for (const date in schedule) {
+                if (schedule.hasOwnProperty(date) && Array.isArray(schedule[date])) {
+                    schedule[date].forEach(block => {
+                        // Basic validation
+                        if (block.subject && block.task && block.start_time && block.end_time) {
+                            // Format the date and time properly
+                            const startDateTime = `${date}T${block.start_time}`;
+                            const endDateTime = `${date}T${block.end_time}`;
+                            
+                            events.push({
+                                title: `${block.subject}: ${block.task}`,
+                                start: startDateTime,
+                                end: endDateTime,
+                                allDay: false,
+                                backgroundColor: getSubjectColor(block.subject),
+                                borderColor: getSubjectColor(block.subject),
+                                textColor: '#000000',
+                                extendedProps: {
+                                    subject: block.subject,
+                                    task: block.task
+                                }
+                            });
+                        } else {
+                            console.warn("Skipping invalid schedule block:", block);
+                        }
+                    });
+                }
+            }
+        } catch (error) {
+            console.error("Error transforming events:", error);
+        }
+        return events;
+    }
+    
+    // Function to generate consistent colors for subjects
+    function getSubjectColor(subject) {
+        // Simple hash function to generate a color based on subject name
+        let hash = 0;
+        for (let i = 0; i < subject.length; i++) {
+            hash = subject.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        
+        // Convert to RGB color with reasonable brightness
+        const r = Math.abs((hash & 0xFF0000) >> 16) % 156 + 100; // Values between 100-255
+        const g = Math.abs((hash & 0x00FF00) >> 8) % 156 + 100;
+        const b = Math.abs(hash & 0x0000FF) % 156 + 100;
+        
+        return `rgb(${r}, ${g}, ${b})`;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const calendarBtn = document.getElementById('view-calendar-btn');
+        const calendarViewEl = document.getElementById('calendar-view');
+        const scheduleRawView = document.getElementById('schedule-raw');
+
+        if (calendarBtn && calendarViewEl && scheduleRawView) {
+            calendarBtn.addEventListener('click', () => {
+                const isHidden = calendarViewEl.style.display === 'none';
+                calendarViewEl.style.display = isHidden ? 'block' : 'none';
+                scheduleRawView.style.display = isHidden ? 'none' : 'block';
+                calendarBtn.textContent = isHidden ? 'View Raw Schedule' : 'View as Calendar';
+
+                if (isHidden && !calendarInstance) {
+                    try {
+                        console.log("Initializing FullCalendar...");
+                        const calendarEvents = transformEvents(scheduleData);
+                        console.log("Transformed Events:", calendarEvents);
+
+                        if (calendarEvents.length === 0) {
+                            if (rawScheduleForDisplay) {
+                                calendarViewEl.innerHTML = '<p class="error-message">Schedule data is invalid. Please try fixing the JSON format.</p>';
+                            } else {
+                                calendarViewEl.innerHTML = '<p class="error-message">No schedule events found.</p>';
+                            }
+                            return;
+                        }
+
+                        const calendarConfig = {
+                            initialView: 'timeGridWeek',
+                            headerToolbar: {
+                                left: 'prev,next today',
+                                center: 'title',
+                                right: 'dayGridMonth,timeGridWeek,listMonth'
+                            },
+                            events: calendarEvents,
+                            editable: false,
+                            dayMaxEvents: true,
+                            height: 'auto',
+                            slotMinTime: '06:00:00',
+                            slotMaxTime: '22:00:00',
+                            expandRows: true,
+                            nowIndicator: true,
+                            displayEventTime: true,
+                            displayEventEnd: true,
+                            eventDisplay: 'block',
+                            slotDuration: '00:30:00',
+                            slotLabelInterval: '01:00',
+                            eventContent: function(arg) {
+                                // Different content for month view vs week view
+                                if (arg.view.type === 'dayGridMonth') {
+                                    return {
+                                        html: `<div class="fc-event-main-frame">
+                                            <div class="fc-event-title">${arg.event.title}</div>
+                                        </div>`
+                                    };
+                                }
+                                // Week view
+                                return {
+                                    html: `<div class="fc-event-main-frame">
+                                        <div class="fc-event-time">${arg.timeText}</div>
+                                        <div class="fc-event-title-container">
+                                            <div class="fc-event-title">${arg.event.title}</div>
+                                        </div>
+                                    </div>`
+                                };
+                            },
+                            eventTimeFormat: {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                hour12: true
+                            },
+                            slotEventOverlap: false,
+                            allDaySlot: false,
+                            views: {
+                                timeGridWeek: {
+                                    dayHeaderFormat: { weekday: 'short', month: 'numeric', day: 'numeric', omitCommas: true }
+                                }
+                            }
+                        };
+                        calendarInstance = new FullCalendar.Calendar(calendarViewEl, calendarConfig);
+
+                        calendarInstance.render();
+                        console.log("FullCalendar rendered successfully.");
+                    } catch (error) {
+                        console.error("Error initializing calendar:", error);
+                        calendarViewEl.innerHTML = '<p class="error-message">Error loading calendar. Please try again.</p>';
+                    }
+                }
+            });
+        }
+
+        // Download schedule button handler
+        const downloadScheduleBtn = document.getElementById('download-schedule-btn');
+        if(downloadScheduleBtn) {
+            downloadScheduleBtn.addEventListener('click', () => {
+                try {
+                    // Create a downloadable text file with schedule data
+                    const scheduleText = formatScheduleForDownload(scheduleData);
+                    const blob = new Blob([scheduleText], { type: 'text/plain' });
+                    const url = URL.createObjectURL(blob);
+                    
+                    // Create download link and trigger click
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'study_schedule.txt';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                } catch (error) {
+                    console.error("Error downloading schedule:", error);
+                    alert("Error preparing schedule for download. Please try again.");
+                }
+            });
+        }
+        
+        // Download full plan button handler
+        const downloadPlanBtn = document.getElementById('download-plan-btn');
+        if(downloadPlanBtn) {
+            downloadPlanBtn.addEventListener('click', async () => {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                // Set initial position
+                let y = 20;
+                const margin = 20;
+                const pageWidth = doc.internal.pageSize.width;
+                
+                // Helper function to add wrapped text (now inside handler)
+                function addWrappedText(text, y, fontSize = 12, color = '#000000') {
+                    doc.setFontSize(fontSize);
+                    doc.setTextColor(color);
+                    const textLines = doc.splitTextToSize(text, pageWidth - 2 * margin);
+                    doc.text(textLines, margin, y);
+                    return y + (textLines.length * fontSize * 0.352);
+                }
+                
+                // Title
+                doc.setFontSize(24);
+                doc.setTextColor('#000000');
+                doc.text("{{ plan.title }}", margin, y);
+                y += 20;
+                
+                // Duration and Creation Date
+                y = addWrappedText(`Duration: {{ plan.start_date }} to {{ plan.end_date }}`, y, 12);
+                y = addWrappedText(`Created: {{ plan.created_at|date("%Y-%m-%d %H:%M") }}`, y, 12);
+                y += 10;
+                
+                // Description
+                if ("{{ plan.description }}") {
+                    y = addWrappedText("Description", y, 14, '#000000');
+                    y = addWrappedText("{{ plan.description }}", y);
+                    y += 10;
+                }
+                
+                // Learning Guide
+                y = addWrappedText("AI Generated Learning Guide", y, 14, '#000000');
+                y = addWrappedText("{{ plan.generated_guide|replace('\n', ' ')|replace('"', '\\"') }}", y);
+                y += 10;
+                
+                // Resources
+                y = addWrappedText("Learning Resources", y, 14, '#000000');
+                y = addWrappedText("{{ plan.resources|replace('\n', ' ')|replace('"', '\\"') }}", y);
+                y += 15;
+                
+                // Schedule
+                y = addWrappedText("Study Schedule", y, 14, '#000000');
+                
+                // Sort dates chronologically
+                const sortedDates = Object.keys(scheduleData).sort();
+                
+                for (const date of sortedDates) {
+                    if (y > doc.internal.pageSize.height - 30) {
+                        doc.addPage();
+                        y = 20;
+                    }
+                    
+                    // Format date nicely
+                    const formattedDate = new Date(date).toLocaleDateString('en-US', {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    });
+                    
+                    // Add date header
+                    doc.setFontSize(12);
+                    doc.setFont(undefined, 'bold');
+                    doc.setTextColor('#2c3e50');
+                    doc.text(formattedDate, margin, y);
+                    y += 7;
+                    
+                    const blocks = scheduleData[date];
+                    if (blocks.length === 0) {
+                        doc.setFont(undefined, 'italic');
+                        doc.setTextColor('#666666');
+                        doc.text("OFF DAY - No studying scheduled", margin + 5, y);
+                        y += 7;
+                    } else {
+                        blocks.forEach(block => {
+                            if (y > doc.internal.pageSize.height - 20) {
+                                doc.addPage();
+                                y = 20;
+                            }
+                            
+                            // Time slot
+                            doc.setFont(undefined, 'normal');
+                            doc.setTextColor('#666666');
+                            const timeText = `${block.start_time} - ${block.end_time}`;
+                            doc.text(timeText, margin + 5, y);
+                            
+                            // Subject
+                            doc.setFont(undefined, 'bold');
+                            doc.setTextColor('#2980b9');
+                            doc.text(block.subject, margin + 45, y);
+                            
+                            // Task
+                            doc.setFont(undefined, 'normal');
+                            doc.setTextColor('#000000');
+                            const taskLines = doc.splitTextToSize(block.task, pageWidth - margin - 100);
+                            doc.text(taskLines, margin + 100, y);
+                            
+                            y += Math.max(7, taskLines.length * 7);
+                        });
+                    }
+                    y += 10;
+                }
+                
+                // Plan Details
+                if (y > doc.internal.pageSize.height - 80) {
+                    doc.addPage();
+                    y = 20;
+                }
+                
+                y = addWrappedText("Plan Details", y, 10, '#000000');
+                doc.setFontSize(10);
+                
+                const details = [
+                    {label: "Subjects", value: "{{ plan.subjects }}"},
+                    {label: "Learning Goal", value: "{{ plan.learning_goal }}"},
+                    {label: "Confidence/Difficulty", value: "{{ plan.difficulty_feedback }}"},
+                    {label: "Hours/Day", value: "{{ plan.hours_per_day }}"},
+                    {label: "Off Days", value: "{{ plan.off_days }}"},
+                    {label: "Class Schedule", value: "{{ plan.class_schedule }}"}
+                ];
+                
+                details.forEach(detail => {
+                    if (y > doc.internal.pageSize.height - 20) {
+                        doc.addPage();
+                        y = 20;
+                    }
+                    doc.setFont(undefined, 'bold');
+                    doc.text(`${detail.label}:`, margin, y);
+                    doc.setFont(undefined, 'normal');
+                    const valueLines = doc.splitTextToSize(detail.value, pageWidth - margin - 50);
+                    doc.text(valueLines, margin + 50, y);
+                    y += Math.max(7, valueLines.length * 7);
+                });
+                
+                // Save the PDF
+                doc.save('study_plan.pdf');
+            });
+        }
+
+        // Export calendar as image functionality
+        const exportImageBtn = document.getElementById('export-image-btn');
+        if (exportImageBtn) {
+            exportImageBtn.addEventListener('click', async () => {
+                const calendarViewEl = document.getElementById('calendar-view');
+                
+                try {
+                    // Store original styles
+                    const originalDisplay = calendarViewEl.style.display;
+                    const originalPosition = calendarViewEl.style.position;
+                    const originalTop = calendarViewEl.style.top;
+                    const originalWidth = calendarViewEl.style.width;
+                    
+                    // Show calendar if hidden
+                    calendarViewEl.style.display = 'block';
+                    
+                    // Initialize calendar if needed
+                    if (!calendarInstance) {
+                        const calendarEvents = transformEvents(scheduleData);
+                        const calendarConfig = {
+                            initialView: 'timeGridWeek',
+                            headerToolbar: {
+                                left: 'prev,next today',
+                                center: 'title',
+                                right: 'dayGridMonth,timeGridWeek,listMonth'
+                            },
+                            events: calendarEvents,
+                            editable: false,
+                            dayMaxEvents: true,
+                            height: 'auto',
+                            slotMinTime: '06:00:00',
+                            slotMaxTime: '22:00:00',
+                            expandRows: true,
+                            nowIndicator: true,
+                            displayEventTime: true,
+                            displayEventEnd: true,
+                            eventDisplay: 'block',
+                            slotDuration: '00:30:00',
+                            slotLabelInterval: '01:00',
+                            eventContent: function(arg) {
+                                // Different content for month view vs week view
+                                if (arg.view.type === 'dayGridMonth') {
+                                    return {
+                                        html: `<div class="fc-event-main-frame">
+                                            <div class="fc-event-title">${arg.event.title}</div>
+                                        </div>`
+                                    };
+                                }
+                                // Week view
+                                return {
+                                    html: `<div class="fc-event-main-frame">
+                                        <div class="fc-event-time">${arg.timeText}</div>
+                                        <div class="fc-event-title-container">
+                                            <div class="fc-event-title">${arg.event.title}</div>
+                                        </div>
+                                    </div>`
+                                };
+                            },
+                            eventTimeFormat: {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                hour12: true
+                            },
+                            slotEventOverlap: false,
+                            allDaySlot: false,
+                            views: {
+                                timeGridWeek: {
+                                    dayHeaderFormat: { weekday: 'short', month: 'numeric', day: 'numeric', omitCommas: true }
+                                }
+                            }
+                        };
+                        calendarInstance = new FullCalendar.Calendar(calendarViewEl, calendarConfig);
+                        calendarInstance.render();
+                        await new Promise(resolve => setTimeout(resolve, 500));
+                    }
+                    
+                    // Prepare for capture
+                    calendarViewEl.style.position = 'static';
+                    calendarViewEl.style.width = '1200px';
+                    await new Promise(resolve => setTimeout(resolve, 100));
+
+                    // Scroll to calendar
+                    calendarViewEl.scrollIntoView({ behavior: 'auto', block: 'nearest' });
+                    await new Promise(resolve => setTimeout(resolve, 100));
+
+                    // Capture the calendar
+                    const canvas = await html2canvas(calendarViewEl, {
+                        scale: 2,
+                        useCORS: true,
+                        logging: false,
+                        windowWidth: 1200,
+                        backgroundColor: '#ffffff',
+                        onclone: function(clonedDoc) {
+                            const clonedElement = clonedDoc.getElementById('calendar-view');
+                            clonedElement.style.transform = 'none';
+                        }
+                    });
+
+                    // Restore original styles
+                    calendarViewEl.style.display = originalDisplay;
+                    calendarViewEl.style.position = originalPosition;
+                    calendarViewEl.style.top = originalTop;
+                    calendarViewEl.style.width = originalWidth;
+
+                    // Download the image
+                    const image = canvas.toDataURL('image/png', 1.0);
+                    const a = document.createElement('a');
+                    a.href = image;
+                    a.download = 'study_calendar.png';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+
+                } catch (error) {
+                    console.error('Error exporting calendar as image:', error);
+                    alert('Error creating calendar image. Please try again.');
+                }
+            });
+        }
+    });
+    
+    // Format schedule data as readable text for download
+    function formatScheduleForDownload(scheduleData) {
+        let output = "STUDY SCHEDULE\n";
+        output += "=============\n\n";
+        
+        // Sort dates chronologically
+        const sortedDates = Object.keys(scheduleData).sort();
+        
+        for (const date of sortedDates) {
+            if (scheduleData.hasOwnProperty(date)) {
+                const blocks = scheduleData[date];
+                
+                // Format date nicely (e.g., "Monday, April 28, 2025")
+                const formattedDate = new Date(date).toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+                
+                output += `${formattedDate}\n`;
+                output += "-".repeat(formattedDate.length) + "\n";
+                
+                if (blocks.length === 0) {
+                    output += "OFF DAY - No studying scheduled\n";
+                } else {
+                    blocks.forEach(block => {
+                        output += `${block.start_time} - ${block.end_time}: ${block.subject} - ${block.task}\n`;
+                    });
+                }
+                
+                output += "\n";
+            }
+        }
+        
+        return output;
+    }
+</script>
+{% endblock %}

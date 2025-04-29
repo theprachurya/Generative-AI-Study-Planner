@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}Your Study Plans - AI Study Planner{% endblock %}
+
+{% block content %}
+<h1>Your Study Plans</h1>
+
+{% if plans %}
+    <ul class="plan-list">
+        {% for plan in plans %}
+            <li class="plan-item">
+                <a href="{{ url_for('view_plan', plan_id=plan.id) }}">
+                    <h2>{{ plan.title }}</h2>
+                    <p>Duration: {{ plan.start_date }} to {{ plan.end_date }}</p>
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>You haven't generated any study plans yet.</p>
+    <a href="{{ url_for('generate_plan') }}" class="btn btn-primary">Generate Your First Plan</a>
+{% endif %}
+
+{% endblock %} 

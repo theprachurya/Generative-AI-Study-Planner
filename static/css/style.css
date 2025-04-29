@@ -1,0 +1,462 @@
+/* Import JetBrains Mono */
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
+
+/* --- Base Styles & Variables --- */
+:root {
+    --font-primary: 'JetBrains Mono', monospace;
+    --font-secondary: sans-serif; /* Fallback */
+
+    /* Light Theme */
+    --bg-color-light: #f8f9fa;
+    --text-color-light: #212529;
+    --primary-color-light: #007bff;
+    --secondary-color-light: #6c757d;
+    --accent-color-light: #17a2b8;
+    --border-color-light: #dee2e6;
+    --card-bg-light: #ffffff;
+
+    /* Dark Theme */
+    --bg-color-dark: #212529;
+    --text-color-dark: #f8f9fa;
+    --primary-color-dark: #0d6efd; /* Slightly brighter blue */
+    --secondary-color-dark: #adb5bd;
+    --accent-color-dark: #20c997; /* Teal */
+    --border-color-dark: #495057;
+    --card-bg-dark: #343a40;
+}
+
+body {
+    font-family: var(--font-secondary);
+    margin: 0;
+    padding: 0;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+body.theme-light {
+    background-color: var(--bg-color-light);
+    color: var(--text-color-light);
+    --bg-color: var(--bg-color-light);
+    --text-color: var(--text-color-light);
+    --primary-color: var(--primary-color-light);
+    --secondary-color: var(--secondary-color-light);
+    --accent-color: var(--accent-color-light);
+    --border-color: var(--border-color-light);
+    --card-bg: var(--card-bg-light);
+}
+
+body.theme-dark {
+    background-color: var(--bg-color-dark);
+    color: var(--text-color-dark);
+    --bg-color: var(--bg-color-dark);
+    --text-color: var(--text-color-dark);
+    --primary-color: var(--primary-color-dark);
+    --secondary-color: var(--secondary-color-dark);
+    --accent-color: var(--accent-color-dark);
+    --border-color: var(--border-color-dark);
+    --card-bg: var(--card-bg-dark);
+}
+
+main {
+    flex: 1;
+    padding: 20px;
+    max-width: 960px;
+    margin: 20px auto;
+    width: 90%;
+}
+
+h1, h2, h3 {
+    font-family: var(--font-primary);
+    color: var(--primary-color);
+}
+
+a {
+    color: var(--accent-color);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* --- Header/Nav --- */
+header {
+    background-color: var(--card-bg);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border-bottom: 1px solid var(--border-color);
+}
+
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 10px 20px;
+}
+
+nav .logo {
+    font-family: var(--font-primary);
+    font-size: 1.5em;
+    font-weight: bold;
+    color: var(--primary-color);
+    text-decoration: none;
+}
+nav .logo:hover {
+    text-decoration: none;
+}
+
+nav .nav-links a {
+    margin-left: 15px;
+    color: var(--text-color);
+    font-weight: 500;
+}
+
+nav .nav-links a:hover {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+#theme-toggle {
+    padding: 8px 12px;
+    font-family: var(--font-primary);
+    background-color: var(--secondary-color);
+    color: var(--bg-color);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+#theme-toggle:hover {
+    background-color: var(--primary-color);
+}
+
+/* --- Buttons --- */
+.btn {
+    display: inline-block;
+    padding: 10px 20px;
+    font-family: var(--font-primary);
+    font-size: 1em;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    border: 1px solid transparent;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: color-mix(in srgb, var(--primary-color) 85%, black);
+    border-color: color-mix(in srgb, var(--primary-color) 85%, black);
+    color: white;
+    text-decoration: none;
+}
+
+.btn-secondary {
+    background-color: var(--secondary-color);
+    color: white;
+    border-color: var(--secondary-color);
+}
+
+.btn-secondary:hover {
+    background-color: color-mix(in srgb, var(--secondary-color) 85%, black);
+    border-color: color-mix(in srgb, var(--secondary-color) 85%, black);
+    color: white;
+    text-decoration: none;
+}
+
+.btn-large {
+    padding: 15px 30px;
+    font-size: 1.1em;
+}
+
+/* --- Forms --- */
+.study-form {
+    background-color: var(--card-bg);
+    padding: 30px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    font-family: var(--font-primary);
+    color: var(--text-color);
+}
+
+.form-group input[type="text"],
+.form-group input[type="date"],
+.form-group input[type="number"],
+.form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-family: var(--font-primary); /* Monospace for inputs */
+    font-size: 1em;
+    box-sizing: border-box;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.form-group small {
+    display: block;
+    margin-top: 5px;
+    font-size: 0.85em;
+    color: var(--secondary-color);
+}
+
+.form-row {
+    display: flex;
+    gap: 20px;
+}
+
+.form-row > div {
+    flex: 1;
+}
+
+.checkbox-group label {
+    display: inline-block;
+    margin-right: 15px;
+    font-weight: normal;
+    font-family: var(--font-secondary);
+}
+
+.checkbox-group input[type="checkbox"] {
+    margin-right: 5px;
+    accent-color: var(--primary-color);
+}
+
+/* --- Index Page Specific --- */
+.hero {
+    text-align: center;
+    padding: 40px 0;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 40px;
+}
+
+.hero h1 {
+    font-size: 2.5em;
+    margin-bottom: 10px;
+}
+
+.hero p {
+    font-size: 1.2em;
+    color: var(--secondary-color);
+    margin-bottom: 20px;
+}
+
+.cta-buttons .btn {
+    margin: 0 10px;
+}
+
+.features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 30px;
+    text-align: center;
+}
+
+.feature-item {
+    background-color: var(--card-bg);
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.feature-item h3 {
+    margin-top: 0;
+    color: var(--accent-color);
+}
+
+/* --- Plans List Page --- */
+.plan-list {
+    list-style: none;
+    padding: 0;
+}
+
+.plan-item {
+    background-color: var(--card-bg);
+    margin-bottom: 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    transition: box-shadow 0.2s ease;
+}
+
+.plan-item:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.plan-item a {
+    display: block;
+    padding: 20px;
+    text-decoration: none;
+    color: inherit;
+}
+.plan-item a:hover {
+    text-decoration: none;
+}
+
+.plan-item h2 {
+    margin: 0 0 10px 0;
+    font-size: 1.4em;
+}
+
+.plan-item p {
+    margin: 0;
+    color: var(--secondary-color);
+    font-size: 0.9em;
+}
+
+/* --- Plan View Page --- */
+.plan-view {
+    background-color: var(--card-bg);
+    padding: 30px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.plan-meta {
+    font-size: 0.9em;
+    color: var(--secondary-color);
+    margin-bottom: 30px;
+    border-bottom: 1px dashed var(--border-color);
+    padding-bottom: 15px;
+}
+
+.plan-section {
+    margin-bottom: 30px;
+}
+
+.plan-section h2 {
+    border-bottom: 2px solid var(--accent-color);
+    padding-bottom: 5px;
+    margin-bottom: 15px;
+    font-size: 1.6em;
+}
+
+.ai-content {
+    line-height: 1.6;
+    font-family: var(--font-secondary); /* Use sans-serif for generated content unless specified */
+}
+
+.ai-content pre,
+.ai-content code {
+    font-family: var(--font-primary);
+    background-color: color-mix(in srgb, var(--bg-color) 90%, var(--text-color));
+    padding: 15px;
+    border-radius: 5px;
+    border: 1px solid var(--border-color);
+    overflow-x: auto;
+    color: var(--text-color);
+}
+
+.schedule-actions .btn {
+    margin-right: 10px;
+    margin-bottom: 10px;
+}
+
+#calendar-view {
+    border: 1px dashed var(--border-color);
+    padding: 20px;
+    min-height: 300px; /* Placeholder */
+    text-align: center;
+    color: var(--secondary-color);
+}
+
+.plan-details-raw {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+    font-size: 0.9em;
+    background-color: color-mix(in srgb, var(--bg-color) 95%, var(--text-color));
+    padding: 15px;
+    border-radius: 5px;
+}
+
+.plan-details-raw h3 {
+     margin-top: 0;
+     font-size: 1.2em;
+     color: var(--secondary-color);
+}
+.plan-details-raw ul {
+    list-style: none;
+    padding-left: 0;
+}
+.plan-details-raw li {
+    margin-bottom: 5px;
+}
+
+/* --- Footer --- */
+footer {
+    text-align: center;
+    padding: 20px;
+    margin-top: 30px;
+    font-size: 0.9em;
+    color: var(--secondary-color);
+    border-top: 1px solid var(--border-color);
+}
+
+/* --- Flash Messages --- */
+.flash-messages {
+    padding: 0;
+    margin: 0 0 20px 0;
+    list-style: none;
+}
+
+.flash-message {
+    padding: 15px 20px;
+    margin-bottom: 15px;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    font-family: var(--font-secondary);
+    opacity: 1;
+    transition: opacity 0.5s ease-out;
+}
+
+/* Style based on category */
+.flash-success {
+    color: #0f5132;
+    background-color: #d1e7dd;
+    border-color: #badbcc;
+}
+
+.flash-danger {
+    color: #842029;
+    background-color: #f8d7da;
+    border-color: #f5c2c7;
+}
+
+.flash-warning {
+    color: #664d03;
+    background-color: #fff3cd;
+    border-color: #ffecb5;
+}
+
+.flash-info {
+    color: #055160;
+    background-color: #cff4fc;
+    border-color: #b6effb;
+} 

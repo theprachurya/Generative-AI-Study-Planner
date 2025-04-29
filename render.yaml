@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: ai-planner
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: FLASK_SECRET_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+    healthCheckPath: /
+    autoDeploy: true 

@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}Welcome - AI Study Planner{% endblock %}
+
+{% block content %}
+<div class="hero">
+    <h1>Welcome to the AI Study Planner</h1>
+    <p>Generate personalized study plans powered by AI to optimize your learning journey.</p>
+    <div class="cta-buttons">
+        <a href="{{ url_for('generate_plan') }}" class="btn btn-primary">Generate a New Study Plan</a>
+        {% if plans_exist %}
+        {# Only show if plans exist - logic to be added in app.py #}
+        <a href="{{ url_for('list_plans') }}" class="btn btn-secondary">View Existing Plans</a>
+        {% endif %}
+    </div>
+</div>
+<h2><center>How it Works</center></h2>
+<div class="features">
+    
+    <div class="feature-item">
+        <h3>1. Input Your Details</h3>
+        <p>Tell us about your subjects, goals, available time, and learning style.</p>
+    </div>
+    <div class="feature-item">
+        <h3>2. AI Generation</h3>
+        <p>Our AI analyzes your input to create a tailored learning guide and schedule.</p>
+    </div>
+    <div class="feature-item">
+        <h3>3. Study Smart</h3>
+        <p>Follow your plan, access resources, and track your progress.</p>
+    </div>
+</div>
+{% endblock %} 

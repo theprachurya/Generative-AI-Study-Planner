@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}AI Study Planner{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block head_extra %}{% endblock %}
+</head>
+<body class="theme-light"> {# Default theme can be changed by JS #}
+    <header>
+        <nav>
+            <a href="{{ url_for('index') }}" class="logo">AI Study Planner</a>
+            <div class="nav-links">
+                <a href="{{ url_for('generate_plan') }}">Generate Plan</a>
+                <a href="{{ url_for('list_plans') }}">View Plans</a> {# Consider hiding if no plans exist #}
+            </div>
+            <button id="theme-toggle">Toggle Dark Mode</button>
+        </nav>
+    </header>
+    <main>
+        {# Display Flash Messages #}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="flash-message flash-{{ category }}" role="alert">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}
+        {% endblock %}
+    </main>
+    <footer>
+        <p>&copy; {{ "now"|date("%Y") }} AI Study Planner</p>
+    </footer>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    {% block scripts_extra %}{% endblock %}
+</body>
+</html> 
