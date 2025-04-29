@@ -1,6 +1,6 @@
 # AI Assisted Study Planner
 
-An intelligent study planning application that leverages AI to create personalized study schedules based on user preferences and academic goals.
+An intelligent study planning application that leverages Google's Generative AI to create personalized study schedules based on user preferences and academic goals.
 
 ## Features
 
@@ -61,8 +61,8 @@ An intelligent study planning application that leverages AI to create personaliz
 4. **Set up environment variables**
    Create a `.env` file in the root directory with:
    ```
-   FLASK_SECRET_KEY=your_secret_key
-   GEMINI_API_KEY=your_gemini_api_key
+   FLASK_SECRET_KEY=your_secret_key #Generate a secret key locally
+   GEMINI_API_KEY=your_gemini_api_key #Obtain your key from Google AI Studio
    ```
 
 5. **Initialize the database**
@@ -78,7 +78,7 @@ An intelligent study planning application that leverages AI to create personaliz
 ## Project Structure
 
 ```
-ai-planner/
+generative-ai-study-planner/
 ├── app.py              # Main application file
 ├── requirements.txt    # Python dependencies
 ├── database/          # Database files and schema
